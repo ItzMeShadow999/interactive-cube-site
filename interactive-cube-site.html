@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interactive Cube Challenge</title>
+  <style>
+    body{margin:0;background:#0a0e17;color:#e6faff;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding:20px 0}
+    h1{margin-bottom:50px;margin-top:-10px;color:#00ffd0;text-shadow:0 0 10px #00ffd0;font-size:28px}
+    .stage{width:240px;height:240px;perspective:900px;}
+    .cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(20deg);transition:transform 0.1s linear}
+    .cube > div{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:bold;background:rgba(255,255,255,0.04);border:2px solid #00ffd0;box-shadow:0 0 10px rgba(0,255,208,0.4) inset;color:#00ffd0}
+    .front{transform:translateZ(120px)}
+    .back{transform:rotateY(180deg) translateZ(120px)}
+    .right{transform:rotateY(90deg) translateZ(120px)}
+    .left{transform:rotateY(-90deg) translateZ(120px)}
+    .top{transform:rotateX(90deg) translateZ(120px)}
+    .bottom{transform:rotateX(-90deg) translateZ(120px)}
+    .controls{margin-top:90px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    button{background:#111;border:1px solid #00ffd0;padding:10px 16px;border-radius:6px;color:#00ffd0;cursor:pointer;font-weight:bold;transition:0.2s}
+    button:hover{background:#00ffd0;color:#111}
+    .score{margin-top:20px;font-size:18px}
+    .play-zone{margin-top:50px;width:200px;height:200px;border:2px dashed #00ffd0;position:relative;border-radius:12px;overflow:hidden}
+    .orb{width:30px;height:30px;border-radius:50%;background:#00ffd0;position:absolute;top:85px;left:85px;box-shadow:0 0 15px #00ffd0;transition:opacity 0.2s ease}
+    .orb-piece{position:absolute;width:6px;height:6px;border-radius:50%;background:#00ffd0;box-shadow:0 0 6px #00ffd0}
+    .hint{text-align:center;margin-top:10px;color:#00ffd0;font-size:14px}
+    footer{margin-top:40px;text-align:center;color:#ccc;font-size:14px;max-width:90%;line-height:1.4}
+    footer a{color:#ff4c4c;text-decoration:none;font-weight:bold;display:inline-flex;align-items:center;gap:6px}
+    .yt-icon{width:18px;height:18px;display:inline-block;background:#ff4c4c;mask:url('https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png') no-repeat center/contain;-webkit-mask:url('https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png') no-repeat center/contain}
+  </style>
+</head>
+<body>
+  <h1>Interactive Cube Challenge</h1>
+  <div class="stage">
+    <div class="cube" id="cube">
+      <div class="front">FRONT</div>
+      <div class="back">BACK</div>
+      <div class="right">RIGHT</div>
+      <div class="left">LEFT</div>
+      <div class="top">TOP</div>
+      <div class="bottom">BOTTOM</div>
+    </div>
+  </div>
+  <div class="controls">
+    <button data-action="up">Rotate Up</button>
+    <button data-action="down">Rotate Down</button>
+    <button data-action="left">Rotate Left</button>
+    <button data-action="right">Rotate Right</button>
+    <button data-action="spin">Spin!</button>
+    <button data-action="reset">Reset</button>
+  </div>
+  <div class="score" id="score">Moves: 0</div>
+
+  <div class="play-zone" id="playZone">
+    <div class="orb" id="orb"></div>
+  </div>
+  <div class="hint">Move your mouse inside the box! Click the orb to make it blast!</div>
+
+  <footer>
+    <p>© All rights reserved to <strong>Pritam Deka</strong>, Founder of this website. This project demonstrates interactive 3D transformations, DOM manipulation, and event-driven animations in pure HTML, CSS, and JavaScript without external libraries. Explore, interact, and learn how creative coding can bring elements to life!</p>
+    <p><a href="https://www.youtube.com/@pritam999xt?si=nymyz4n0AThfHE1-" target="_blank"><span class="yt-icon"></span> Visit my YouTube Channel</a></p>
+  </footer>
+
+  <script>
+    const cube=document.getElementById('cube');
+    let x=-20,y=20,moves=0;
+
+    function updateCube(){
+      cube.style.transform=`rotateX(${x}deg) rotateY(${y}deg)`;
+      document.getElementById('score').textContent=`Moves: ${moves}`;
+    }
+
+    document.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const act=btn.dataset.action;
+        if(act==='up'){x+=20;moves++}
+        if(act==='down'){x-=20;moves++}
+        if(act==='left'){y-=20;moves++}
+        if(act==='right'){y+=20;moves++}
+        if(act==='spin'){x+=360;y+=360;moves+=10}
+        if(act==='reset'){x=-20;y=20;moves=0}
+        updateCube();
+      });
+    });
+
+    let interval=null;
+    const step=4;
+    window.addEventListener('keydown',e=>{
+      if(interval) return;
+      if(e.key==='ArrowUp'){interval=setInterval(()=>{x+=step;updateCube();},30)}
+      if(e.key==='ArrowDown'){interval=setInterval(()=>{x-=step;updateCube();},30)}
+      if(e.key==='ArrowLeft'){interval=setInterval(()=>{y-=step;updateCube();},30)}
+      if(e.key==='ArrowRight'){interval=setInterval(()=>{y+=step;updateCube();},30)}
+    });
+    window.addEventListener('keyup',()=>{clearInterval(interval);interval=null;moves++;updateCube();});
+
+    const playZone=document.getElementById('playZone');
+    const orb=document.getElementById('orb');
+    let orbX=85,orbY=85;
+
+    playZone.addEventListener('mousemove',e=>{
+      const rect=playZone.getBoundingClientRect();
+      orbX=e.clientX-rect.left-15;
+      orbY=e.clientY-rect.top-15;
+      orb.style.left=`${orbX}px`;
+      orb.style.top=`${orbY}px`;
+    });
+
+    orb.addEventListener('click',()=>{
+      blastEffect(orbX+15,orbY+15);
+      orb.style.opacity='0';
+      setTimeout(()=>{
+        orb.style.opacity='1';
+      },2000);
+    });
+
+    function blastEffect(centerX,centerY){
+      const numPieces=20;
+      for(let i=0;i<numPieces;i++){
+        const piece=document.createElement('div');
+        piece.className='orb-piece';
+        piece.style.left=centerX+'px';
+        piece.style.top=centerY+'px';
+        playZone.appendChild(piece);
+
+        const angle=Math.random()*2*Math.PI;
+        const distance=40+Math.random()*40;
+        const destX=centerX+Math.cos(angle)*distance;
+        const destY=centerY+Math.sin(angle)*distance;
+
+        piece.animate([
+          {transform:`translate(0,0) scale(1)`,opacity:1},
+          {transform:`translate(${destX-centerX}px,${destY-centerY}px) scale(0.3)`,opacity:0}
+        ],{
+          duration:1000+Math.random()*500,
+          easing:'ease-out'
+        });
+
+        setTimeout(()=>piece.remove(),1500);
+      }
+    }
+  </script>
+</body>
+</html>
